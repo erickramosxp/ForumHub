@@ -9,5 +9,4 @@ public class ForumbhubApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ForumbhubApplication.class, args);
 	}
-
 }
