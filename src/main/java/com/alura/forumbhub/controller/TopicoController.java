@@ -1,14 +1,20 @@
 package com.alura.forumbhub.controller;
 
-import com.alura.forumbhub.domain.topico.DadosCriarTopico;
-import com.alura.forumbhub.domain.topico.DadosListagemTopicos;
-import com.alura.forumbhub.domain.topico.Topico;
-import com.alura.forumbhub.domain.topico.TopicoRepository;
+import com.alura.forumbhub.domain.topico.*;
 import com.alura.forumbhub.domain.usuario.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/topicos")
@@ -22,16 +28,50 @@ public class TopicoController {
 
 
     @PostMapping
-    public void criarTopico(@RequestBody DadosCriarTopico dados) {
+    @Transactional
+    public ResponseEntity criarTopico(@RequestBody @Valid DadosCriarTopico dados, UriComponentsBuilder uriBuilder) {
         var usuario = usuarioRepository.getReferenceById(dados.idUsuario());
         var topico = new Topico(dados, usuario);
         topicoRepository.save(topico);
+
+        var uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new DadosListagemTopicos(topico));
     }
 
     @GetMapping
-    public List<DadosListagemTopicos> listar() {
-        var topicos = topicoRepository.findAll().stream()
-                .map(DadosListagemTopicos::new).toList();
-        return topicos;
+    public ResponseEntity<Page<DadosListagemTopicos>> listar(@PageableDefault(sort = "data") Pageable paginacao) {
+        var topicos = topicoRepository.findByMensagemNotNull(paginacao)
+                .map(DadosListagemTopicos::new);
+        return ResponseEntity.ok(topicos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity detalharTopico(@PathVariable Long id){
+        var topico = topicoRepository.getReferenceById(id);
+        return ResponseEntity.ok(new DadosListagemTopicos(topico));
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity atualizarTopico(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoTopico dados) {
+        Optional<Topico> resposta = topicoRepository.findById(id);
+        if (!resposta.isPresent()) {
+            throw new EntityNotFoundException("Topico não encontrado");
+        }
+        var topico = resposta.get();
+        topico.atualizarInformacoes(dados);
+        return ResponseEntity.ok(new DadosListagemTopicos(topico));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity deletarTopico(@PathVariable Long id) {
+        Optional<Topico> resposta = topicoRepository.findById(id);
+        if(!resposta.isPresent()) {
+            throw new EntityNotFoundException("Topico não encontrado");
+        }
+        topicoRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

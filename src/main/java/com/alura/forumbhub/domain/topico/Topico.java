@@ -37,7 +37,7 @@ public class Topico {
     @Enumerated(EnumType.STRING)
     private Curso curso;
 
-    @OneToMany(mappedBy = "topico")
+    @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL)
     private List<Resposta> respostas;
 
     public Topico(DadosCriarTopico dados, Usuario usuario) {
@@ -52,5 +52,20 @@ public class Topico {
     public void addResposta(Resposta resposta) {
         resposta.setTopico(this);
         respostas.add(resposta);
+    }
+
+    public void atualizarInformacoes(DadosAtualizacaoTopico dados) {
+        if (dados.titulo() != null) {
+            this.titulo = dados.titulo();
+        }
+        if (dados.mensagem() != null) {
+            this.mensagem = dados.mensagem();
+        }
+        if (dados.status() != null) {
+            this.status = dados.status();
+        }
+        if (dados.curso() != null) {
+            this.curso = dados.curso();
+        }
     }
 }
