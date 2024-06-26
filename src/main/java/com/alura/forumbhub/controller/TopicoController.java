@@ -2,6 +2,7 @@ package com.alura.forumbhub.controller;
 
 import com.alura.forumbhub.domain.topico.*;
 import com.alura.forumbhub.domain.usuario.UsuarioRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/topicos")
+@SecurityRequirement(name = "bearer-key")
 public class TopicoController {
 
     @Autowired
@@ -51,10 +53,10 @@ public class TopicoController {
         return ResponseEntity.ok(new DadosListagemTopicos(topico));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @Transactional
-    public ResponseEntity atualizarTopico(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoTopico dados) {
-        Optional<Topico> resposta = topicoRepository.findById(id);
+    public ResponseEntity atualizarTopico(@RequestBody @Valid DadosAtualizacaoTopico dados) {
+        Optional<Topico> resposta = topicoRepository.findById(dados.id());
         if (!resposta.isPresent()) {
             throw new EntityNotFoundException("Topico não encontrado");
         }

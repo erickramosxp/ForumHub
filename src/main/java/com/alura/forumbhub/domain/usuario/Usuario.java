@@ -3,11 +3,13 @@ package com.alura.forumbhub.domain.usuario;
 import com.alura.forumbhub.domain.Perfil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Data
 public class Usuario implements UserDetails {
 
     @Id
@@ -33,7 +36,7 @@ public class Usuario implements UserDetails {
     public Usuario(DadosCadastroUsuario dados) {
         this.nome = dados.nome();
         this.email = dados.email();
-        this.senha = dados.senha();
+        this.senha = BCrypt.hashpw(dados.senha(), BCrypt.gensalt());
         this.perfil = dados.perfil();
     }
 
@@ -45,7 +48,7 @@ public class Usuario implements UserDetails {
             this.email = dados.email();
         }
         if (dados.senha() != null) {
-            this.senha = dados.senha();
+            this.senha = BCrypt.hashpw(dados.senha(), BCrypt.gensalt());
         }
     }
 

@@ -1,19 +1,16 @@
 package com.alura.forumbhub.controller;
 
 import com.alura.forumbhub.domain.usuario.*;
-import jakarta.persistence.EntityNotFoundException;
+import com.alura.forumbhub.infra.security.TokenService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -35,17 +32,15 @@ public class UsuarioController {
 
     @PutMapping
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity atualizar(@RequestBody @Valid DadosAtualizarUsuario dados) {
-//        Optional<Usuario> user = repository.findById(dados.id());
-//        if (!user.isPresent()) {
-//            throw new EntityNotFoundException("Usuario não encontrado");
-//        }
         var usuario = repository.getReferenceById(dados.id());
         usuario.atulizarInformacoes(dados);
         return ResponseEntity.ok(new DadosListagemUsuarios(usuario));
     }
     
     @GetMapping
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<Page<DadosListagemUsuarios>> listar(Pageable paginacao) {
         var usuarios = repository.retornarTodosUsuarios(paginacao)
                 .map(DadosListagemUsuarios::new);
@@ -53,9 +48,9 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity detaharUsuario(@PathVariable Long id) {
         var usuario = repository.getReferenceById(id);
         return ResponseEntity.ok(new DadosListagemUsuarios(usuario));
     }
-
 }

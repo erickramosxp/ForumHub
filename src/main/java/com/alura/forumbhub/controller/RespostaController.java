@@ -8,6 +8,7 @@ import com.alura.forumbhub.domain.topico.DadosListagemTopicos;
 import com.alura.forumbhub.domain.topico.Topico;
 import com.alura.forumbhub.domain.topico.TopicoRepository;
 import com.alura.forumbhub.domain.usuario.UsuarioRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/topicos/{id}/resposta")
+@SecurityRequirement(name = "bearer-key")
 public class RespostaController {
 
     @Autowired
