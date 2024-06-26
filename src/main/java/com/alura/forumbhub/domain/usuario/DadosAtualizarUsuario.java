@@ -6,6 +6,7 @@ public record DadosAtualizarUsuario(
         @NotNull
         Long id,
         String nome,
-        String email
+        String email,
+        String senha
 ) {
 }
